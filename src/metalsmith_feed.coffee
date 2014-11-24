@@ -1,11 +1,13 @@
 module.exports = (options={}) ->
   RSS = require 'rss'
+  Handlebars = require 'handlebars'
   extend = require 'extend'
   url = require 'url'
 
   limit = options.limit or 20
   destination = options.destination or 'rss.xml'
   collectionName = options.collection
+  titleTemplate = Handlebars.compile(options.titleTemplate or '{{title}}')
 
   unless collectionName
     throw new Error 'collection option is required'
@@ -36,6 +38,7 @@ module.exports = (options={}) ->
         description: file.less or file.excerpt or file.contents
       if not itemData.url and itemData.path
         itemData.url = url.resolve siteUrl, file.path
+      itemData.title = titleTemplate file
       feed.item itemData
 
     files[destination] = contents: new Buffer feed.xml(), 'utf8'
